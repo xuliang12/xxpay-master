@@ -12,8 +12,8 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/xxpaydb?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&useSSL=false
-    username: xxpay
-    password: xxpay
+    username: xuliang
+    password: 123456
     initialSize: 5    # 初始化大小
     minIdle: 5        # 最小
     maxActive: 20     # 最大
@@ -36,12 +36,13 @@ spring:
     in-memory: true
 
 logging:
-  file: ./log/xxpay4dubbo-service.log
+  file: D:/log/pay/xxpay4dubbo-service.log
 
 config:
   ali:
-    notify_url: http://xxpay.nat100.top/notify/pay/aliPayNotifyRes.htm
+    notify_url: http://10.20.1.130:3020/notify/pay/aliPayNotifyRes.htm
     return_url: http://www.xxpay.org
+    isSandbox: 1
   wx:
     certRootPath: /Users/dingzhiwei/java/tmp/cert
     notifyUrl: http://xxpay.nat100.top/notify/pay/wxPayNotifyRes.htm

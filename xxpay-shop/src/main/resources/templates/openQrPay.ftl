@@ -8,7 +8,7 @@
     <meta name="author" content="fyunli">
 
     <base id="base" href="${base}">
-    <title>【XXPAY】分布式开源聚合支付</title>
+    <title>pay</title>
 
     <!-- Bootstrap core CSS -->
     <link href="//cdn.jsdelivr.net/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +26,7 @@
 <!-- Begin page content -->
 <div class="container">
     <div class="page-header">
-        <h1>【XxPay】分布式开源聚合支付系统</h1>
+        <h1>PAY</h1>
     </div>
     <div class="main" align="center">
         <div class="inwrap">
@@ -80,7 +80,7 @@
         }
         $("#vAmt").text(vAmt+'元');
         //var qrText = 'http://xxpay-shop.ngrok.cc/goods/qrPay/' + (vAmt*100);
-        var qrText = 'http://shop.xxpay.org/goods/qrPay.html?amount=' + (vAmt*100);
+        var qrText = 'http://10.20.1.130:8081/goods/qrPay.html?amount=' + (vAmt*100);
         qrcode.makeCode(qrText);
     }
 

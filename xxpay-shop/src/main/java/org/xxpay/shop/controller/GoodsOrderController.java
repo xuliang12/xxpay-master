@@ -37,7 +37,7 @@ public class GoodsOrderController {
     @Autowired
     private GoodsOrderService goodsOrderService;
 
-    static final String mchId = "20001223";
+    static final String mchId = "10000000";
     // 加签key
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
@@ -45,13 +45,13 @@ public class GoodsOrderController {
     //static final String baseUrl = "http://api.xxpay.org/api";
     static final String baseUrl = "http://127.0.0.1:3020/api";
     //static final String notifyUrl = "http://shop.xxpay.org/goods/payNotify";
-    static final String notifyUrl = "http://127.0.0.1:8081/goods/payNotify";
+    static final String notifyUrl = "http://10.20.1.130:8081/goods/payNotify";
     private AtomicLong seq = new AtomicLong(0L);
-    private final static String QR_PAY_URL = "http://shop.xxpay.org/goods/qrPay.html";
+    private final static String QR_PAY_URL = "http://10.20.1.130:8081//goods/qrPay.html";
     static final String AppID = "wx077cb62e341f8a5c";
     static final String AppSecret = "e663ea068f3e4f952f143de1432a35c2";
-    private final static String GetOpenIdURL = "http://shop.xxpay.org/goods/getOpenId";
-    private final static String GetOpenIdURL2 = "http://shop.xxpay.org/goods/getOpenId2";
+    private final static String GetOpenIdURL = "http://10.20.1.130:8081/goods/getOpenId";
+    private final static String GetOpenIdURL2 = "http://10.20.1.130:8081/goods/getOpenId2";
 
 
     @RequestMapping(value = "/buy/{goodsId}", method = RequestMethod.GET)
