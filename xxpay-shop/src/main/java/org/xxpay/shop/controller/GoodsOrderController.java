@@ -37,7 +37,10 @@ public class GoodsOrderController {
     @Autowired
     private GoodsOrderService goodsOrderService;
 
-    static final String mchId = "10000000";
+    static final String mchId = "10000001";
+
+    static final String aliMchId = "10000000";
+
     // 加签key
     static final String reqKey = "M86l522AV6q613Ii4W6u8K48uW8vM1N6bFgyv769220MdYe9u37N4y7rI5mQ";
     // 验签key
@@ -45,13 +48,16 @@ public class GoodsOrderController {
     //static final String baseUrl = "http://api.xxpay.org/api";
     static final String baseUrl = "http://127.0.0.1:3020/api";
     //static final String notifyUrl = "http://shop.xxpay.org/goods/payNotify";
-    static final String notifyUrl = "http://10.20.1.130:8081/goods/payNotify";
+    static final String notifyUrl = "http://192.168.199.101:8081/goods/payNotify";
     private AtomicLong seq = new AtomicLong(0L);
-    private final static String QR_PAY_URL = "http://10.20.1.130:8081//goods/qrPay.html";
+    private final static String QR_PAY_URL = "http://192.168.199.101:8081//goods/qrPay.html";
     static final String AppID = "wx077cb62e341f8a5c";
     static final String AppSecret = "e663ea068f3e4f952f143de1432a35c2";
-    private final static String GetOpenIdURL = "http://10.20.1.130:8081/goods/getOpenId";
-    private final static String GetOpenIdURL2 = "http://10.20.1.130:8081/goods/getOpenId2";
+    private final static String GetOpenIdURL = "http://192.168.199.101:8081/goods/getOpenId";
+    private final static String GetOpenIdURL2 = "http://192.168.199.101:8081/goods/getOpenId2";
+
+    //转账回调
+    static final String notifyUrlTrans = "http://127.0.0.1:8081/goods/notify_test?rt=success"; // 本地环境测试,可到ngrok.cc网站注册
 
 
     @RequestMapping(value = "/buy/{goodsId}", method = RequestMethod.GET)
@@ -129,7 +135,13 @@ public class GoodsOrderController {
 
     private Map createPayOrder(GoodsOrder goodsOrder, Map<String, Object> params) {
         JSONObject paramMap = new JSONObject();
-        paramMap.put("mchId", mchId);                       // 商户ID
+
+        String channelId = params.get("channelId").toString();
+        if (channelId.contains("wx")) {
+            paramMap.put("mchId", mchId);
+        }else {
+            paramMap.put("mchId", aliMchId);
+        }                   // 商户ID
         paramMap.put("mchOrderNo", goodsOrder.getGoodsOrderId());           // 商户订单号
         paramMap.put("channelId", params.get("channelId"));             // 支付渠道ID, WX_NATIVE,ALIPAY_WAP
         paramMap.put("amount", goodsOrder.getAmount());                          // 支付金额,单位分
@@ -144,6 +156,7 @@ public class GoodsOrderController {
 
         JSONObject extra = new JSONObject();
         extra.put("openId", params.get("openId"));
+        extra.put("productId", goodsOrder.getGoodsId());
         paramMap.put("extra", extra.toJSONString());  // 附加参数
 
         String reqSign = PayDigestUtil.getSign(paramMap, reqKey);
@@ -195,7 +208,7 @@ public class GoodsOrderController {
                 channelId = "ALIPAY_WAP";
             }else if(ua.contains("MicroMessenger")) {
                 client = "wx";
-                channelId = "WX_JSAPI";
+                channelId = "WX_NATIVE";
             }
         }
         if(client == null) {
@@ -388,6 +401,58 @@ public class GoodsOrderController {
         outResult(response, "success");
     }
 
+    @RequestMapping("/toAliPaytrans.html")
+    @ResponseBody
+    public String toAlipayTrans(HttpServletRequest request,Long amount,String channelId){
+        String logPrefix = "【支付宝支付-转账】";
+        _log.info("====== 开始接收支付宝转账请求 ======");
+
+        return createTransOrder(amount, channelId);
+    }
+
+        public String createTransOrder(Long amount,String channelId){
+            JSONObject paramMap = new JSONObject();
+            paramMap.put("mchId", mchId);                               // 商户ID
+            paramMap.put("mchTransNo", "TRANS" + System.currentTimeMillis());     // 商户订单号
+            // 支付渠道ID, WX_NATIVE(微信扫码),WX_JSAPI(微信公众号或微信小程序),WX_APP(微信APP),WX_MWEB(微信H5),ALIPAY_WAP(支付宝手机支付),ALIPAY_PC(支付宝网站支付),ALIPAY_MOBILE(支付宝移动支付)
+            paramMap.put("channelId", channelId);
+            paramMap.put("amount", amount);                                  // 转行金额,单位分
+            paramMap.put("currency", "cny");                            // 币种, cny-人民币
+            paramMap.put("clientIp", "211.94.116.218");                 // 用户地址,微信H5支付时要真实的
+            paramMap.put("device", "WEB");                              // 设备
+            paramMap.put("subject", "XXPAY支付转账测试");
+            paramMap.put("body", "XXPAY支付转账测试");
+            paramMap.put("notifyUrl", notifyUrlTrans);                       // 回调URL
+            paramMap.put("param1", "");                                 // 扩展参数1
+            paramMap.put("param2", "");                                 // 扩展参数2
+            paramMap.put("channelUser", "koxhdm1088@sandbox.com"); // 微信openId(丁志伟):oIkQuwhPgPUgl-TvQ48_UUpZUwMs, 支付宝(丁志伟):jmdhappy@126.com
+            paramMap.put("remarkInfo", "转账测试");
+
+
+            //{"h5_info": {"type":"Wap","wap_url": "https://pay.qq.com","wap_name": "腾讯充值"}}
+
+            String reqSign = PayDigestUtil.getSign(paramMap, reqKey);
+            paramMap.put("sign", reqSign);                              // 签名
+            String reqData = "params=" + paramMap.toJSONString();
+            System.out.println("请求支付中心转账接口,请求数据:" + reqData);
+            String url = baseUrl + "/trans/create_order?";
+            String result = XXPayUtil.call4Post(url + reqData);
+            System.out.println("请求支付中心转账接口,响应数据:" + result);
+            Map retMap = JSON.parseObject(result);
+            if("SUCCESS".equals(retMap.get("retCode")) && "SUCCESS".equalsIgnoreCase(retMap.get("resCode").toString())) {
+                // 验签
+                String checkSign = PayDigestUtil.getSign(retMap, resKey, "sign", "payParams");
+                String retSign = (String) retMap.get("sign");
+                if(checkSign.equals(retSign)) {
+                    System.out.println("=========支付中心转账验签成功=========");
+                }else {
+                    System.err.println("=========支付中心转账验签失败=========");
+                    return null;
+                }
+            }
+            return retMap.get("transOrderId")+"";
+        }
+
     @RequestMapping("/toAliPay.html")
     @ResponseBody
     public String toAliPay(HttpServletRequest request, Long amount, String channelId) {
@@ -438,6 +503,9 @@ public class GoodsOrderController {
         return responseMap;
     }
 
+
+
+
     public boolean verifyPayResponse(Map<String,Object> map) {
         String mchId = (String) map.get("mchId");
         String payOrderId = (String) map.get("payOrderId");
@@ -482,11 +550,14 @@ public class GoodsOrderController {
         return true;
     }
 
+
     public boolean verifySign(Map<String, Object> map) {
         String mchId = (String) map.get("mchId");
-        if(!this.mchId.equals(mchId)) return false;
-        String localSign = PayDigestUtil.getSign(map, resKey, "sign");
+        if(!this.aliMchId.equals(mchId)) return false;
         String sign = (String) map.get("sign");
+//        map.remove("sign");
+        String localSign = PayDigestUtil.getSign(map, resKey, "sign");
+        System.out.println("localSign:"+localSign+"------sign:"+sign);
         return localSign.equalsIgnoreCase(sign);
     }
 

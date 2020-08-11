@@ -49,11 +49,17 @@ public class MySeq {
 	}
 
 	public static void main(String[] args) {
-		for (int i = 0; i < 100; i++) {
-			System.out.println("pay=" + getPay());
-			System.out.println("trans=" + getTrans());
-			System.out.println("refund=" + getRefund());
-		}
+//		for (int i = 0; i < 100; i++) {
+//			System.out.println("pay=" + getPay());
+//			System.out.println("trans=" + getTrans());
+//			System.out.println("refund=" + getRefund());
+//		}
+		pay_seq_prefix += node;
+			String str =   String.format("%s%s%06d", pay_seq_prefix, DateUtil.getSeqString(), (int) pay_seq.getAndIncrement() % 1000000);
+			String str1 =   String.format("%08d",(int) pay_seq.getAndIncrement() % 1000000);
+        int num = (int) pay_seq.getAndIncrement();
+		System.out.println(str+"----->>" +str1);
+
 
 	}
 

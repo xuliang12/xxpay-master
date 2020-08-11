@@ -42,6 +42,8 @@ public class Mq4MchNotify extends BaseService4PayOrder {
 
     /**
      * 发送延迟消息
+     *
+     * 延迟delay 秒，投递1次，间隔1秒:
      * @param msg
      * @param delay
      */

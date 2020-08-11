@@ -10,4 +10,4 @@ spring:
     scan: org.xxpay.dubbo
 
 logging:
-  file: D:/log/pay//xxpay4dubbo-web.log
+  file: /Users/xuliang/Documents/log/pay//xxpay4dubbo-web.log
